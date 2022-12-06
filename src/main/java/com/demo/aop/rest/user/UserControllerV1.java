@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@UseControllerAdvice
 @RequestMapping(value = "/v1/user")
 public class UserControllerV1 {
 
@@ -38,5 +37,10 @@ public class UserControllerV1 {
         User created = userService.create(user);
         System.out.println("User created: " + created);
         return ResponseEntity.ok(created);
+    }
+
+    @PutMapping(value="{id}")
+    public ResponseEntity updateUser(@PathVariable(value = "id") String id, @RequestBody UserProperties user) {
+        return ResponseEntity.ok(userService.update(UUID.fromString(id), user));
     }
 }
