@@ -1,5 +1,6 @@
 package com.demo.aop.rest.user;
 
+import com.demo.aop.aspects.UseControllerAdvice;
 import com.demo.aop.service.UserService;
 import com.demo.aop.service.model.UserProperties;
 import com.demo.aop.service.model.User;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@UseControllerAdvice
 @RequestMapping(value = "/v1/user")
 public class UserControllerV1 {
 
