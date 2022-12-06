@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class TraceAspect {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    // private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Pointcut("within(com.demo.aop..*)")
     public void myApplicationPackage() {
@@ -23,6 +23,7 @@ public class TraceAspect {
 
     @Around("myApplicationPackage()")
     public Object trace(final ProceedingJoinPoint joinPoint) throws Throwable {
+        final Logger logger = LoggerFactory.getLogger(joinPoint.getSignature().getDeclaringType());
         final JoinPointShortcuts shortcuts = new JoinPointShortcuts(joinPoint);
         Instant start = Instant.now();
 

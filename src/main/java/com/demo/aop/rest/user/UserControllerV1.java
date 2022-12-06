@@ -1,17 +1,11 @@
 package com.demo.aop.rest.user;
 
-import com.demo.aop.repository.RepositoryException;
 import com.demo.aop.service.UserService;
-import com.demo.aop.service.exception.ValidationException;
-import com.demo.aop.service.model.CreateUser;
+import com.demo.aop.service.model.UserProperties;
 import com.demo.aop.service.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +32,7 @@ public class UserControllerV1 {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody CreateUser user) {
+    public ResponseEntity<User> createUser(@RequestBody UserProperties user) {
         User created = userService.create(user);
         System.out.println("User created: " + created);
         return ResponseEntity.ok(created);

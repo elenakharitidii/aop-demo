@@ -1,7 +1,6 @@
 package com.demo.aop.repository;
 
-import com.demo.aop.service.model.CreateUser;
-import com.demo.aop.service.model.UpdateUser;
+import com.demo.aop.service.model.UserProperties;
 import com.demo.aop.service.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -39,23 +38,18 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User create(CreateUser properties) {
-        checkUniqueEmail(properties.getEmail());
-        checkPhone(properties.getPhone());
-        User user = new User(
-                UUID.randomUUID(),
-                properties.getName(),
-                properties.getUsername(),
-                properties.getEmail(),
-                properties.getPhone(),
-                true);
-        store.put(user.getId(), user);
-        return store.get(user.getId());
+    public User update(UUID id, UserProperties properties) {
+        if (store.containsKey(id)) {
+            return writeToStore(id, properties);
+        }
+        throw new RepositoryException(NOT_FOUND, "user");
     }
 
     @Override
-    public User update(UpdateUser properties) {
-        return null;
+    public User create(UserProperties properties) {
+        checkUniqueEmail(properties.getEmail());
+        checkPhone(properties.getPhone());
+        return writeToStore(UUID.randomUUID(), properties);
     }
 
     @Override
@@ -70,9 +64,21 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-    private synchronized void checkPhone(String phone) {
+    private void checkPhone(String phone) {
         if (phone == null || phone.length() == 0) {
             throw new RepositoryException(INVALID, "phone");
         }
+    }
+
+    private User writeToStore(UUID id, UserProperties properties) {
+        User user = new User(
+                id,
+                properties.getName(),
+                properties.getUsername(),
+                properties.getEmail(),
+                properties.getPhone(),
+                true);
+        store.put(user.getId(), user);
+        return store.get(user.getId());
     }
 }

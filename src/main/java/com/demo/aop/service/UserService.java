@@ -2,12 +2,13 @@ package com.demo.aop.service;
 
 import com.demo.aop.repository.UserRepository;
 import com.demo.aop.service.exception.ValidationException;
-import com.demo.aop.service.model.CreateUser;
-import com.demo.aop.service.model.UpdateUser;
+import com.demo.aop.service.model.UserProperties;
 import com.demo.aop.service.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -20,8 +21,8 @@ import static com.demo.aop.service.exception.ErrorMessageFactory.*;
 public interface UserService {
     List<User> getAll();
     User get(UUID id);
-    User create(CreateUser properties);
-    User update(UpdateUser properties);
+    User create(UserProperties properties);
+    User update(UUID id, UserProperties properties);
     void delete(UUID id);
 }
 
@@ -40,6 +41,7 @@ class UserServiceImpl implements UserService {
         return repository.getAll();
     }
 
+    @Cacheable("user")
     @Override
     public User get(UUID id) {
         logger.info("event=EnterMethodCall, signature={}.{}(..), id={}", this.getClass().getSimpleName(), "create", id);
@@ -60,7 +62,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User create(CreateUser properties) {
+    public User create(UserProperties properties) {
         logger.info("event=EnterMethodCall, signature={}.{}(..), input={}", this.getClass().getSimpleName(), "create", properties);
         try {
             validate(properties);
@@ -77,8 +79,9 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(UpdateUser properties) {
-        return repository.update(properties);
+    @CacheEvict(value="user", allEntries=true)
+    public User update(UUID id, UserProperties properties) {
+        return repository.update(id, properties);
     }
 
     @Override
@@ -92,7 +95,7 @@ class UserServiceImpl implements UserService {
             throw new ValidationException(userEmailExists(email));
         }
     }
-    private void validate(CreateUser properties) {
+    private void validate(UserProperties properties) {
         if (properties.getEmail() == null || properties.getEmail().trim().length() == 0) {
             throw new ValidationException(invalidEmail(properties.getEmail()));
         }

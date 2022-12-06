@@ -3,7 +3,7 @@ package com.demo.aop.rest.user;
 import com.demo.aop.repository.RepositoryException;
 import com.demo.aop.service.UserService;
 import com.demo.aop.service.exception.ValidationException;
-import com.demo.aop.service.model.CreateUser;
+import com.demo.aop.service.model.UserProperties;
 import com.demo.aop.service.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +73,7 @@ public class UserControllerV2 {
     }
 
     @PostMapping
-    public ResponseEntity createUser(@RequestBody CreateUser user) {
+    public ResponseEntity createUser(@RequestBody UserProperties user) {
         try {
             return ResponseEntity.ok(userService.create(user));
         }
@@ -106,6 +106,43 @@ public class UserControllerV2 {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to create user, please see logs for more details");
+        }
+    }
+
+    @PutMapping(value="{id}")
+    public ResponseEntity updateUser(@PathVariable(value = "id") String id, @RequestBody UserProperties user) {
+        try {
+            return ResponseEntity.ok(userService.update(UUID.fromString(id), user));
+        }
+        catch (ValidationException e) {
+            logger.error("event=updateUserFailed, user={}", user, e);
+            return ResponseEntity
+                    .badRequest()
+                    .body(new ErrorResponse(
+                                    HttpStatus.BAD_REQUEST.value(),
+                                    HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                    "Failed to update user, input failed validation, please see logs for more details",
+                                    "/v2/user"
+                            )
+                    );
+        }
+        catch (RepositoryException e) {
+            logger.error("event=updateUserFailed, id={}, user={}", id, user, e);
+            if (e.getLocalizedMessage().contains("INVALID")) {
+                return ResponseEntity
+                        .badRequest()
+                        .body("Failed to update user, input failed validation, please see logs for more details");
+            } else {
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Failed to update user, please see logs for more details");
+            }
+        }
+        catch (Exception e) {
+            logger.error("event=updateUserFailed, id={}, user={}", id, user, e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update user, please see logs for more details");
         }
     }
 }

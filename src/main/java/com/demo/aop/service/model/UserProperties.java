@@ -5,7 +5,6 @@ import lombok.*;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import java.util.Optional;
 
 import static com.demo.aop.service.exception.ErrorMessageFactory.invalidEmail;
 
@@ -13,18 +12,18 @@ import static com.demo.aop.service.exception.ErrorMessageFactory.invalidEmail;
 @Builder
 // @ToString
 // @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class CreateUser {
+public class UserProperties {
     private String name;
     private String username;
     private String email;
     private String phone;
 
-    public static CreateUserBuilder builder() {
-        return new CustomCreateUserBuilder();
+    public static UserPropertiesBuilder builder() {
+        return new CustomUserPropertiesBuilder();
     }
 
-    private static class CustomCreateUserBuilder extends CreateUserBuilder {
-        public CreateUser build() {
+    private static class CustomUserPropertiesBuilder extends UserPropertiesBuilder {
+        public UserProperties build() {
             try {
                 InternetAddress address = new InternetAddress(super.email);
                 address.validate();
@@ -35,7 +34,7 @@ public class CreateUser {
         }
     }
 
-    public CreateUser(String name, String username, String email, String phone) {
+    public UserProperties(String name, String username, String email, String phone) {
         this.name = name;
         this.username = username;
         this.email = email;
